@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-Coqui Enhanced TTS - Voice Cloning & Generation</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/enhanced-main.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>J-Coqui Enhanced TTS</h1>
+                <span class="version">v2.0</span>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="generate">Generate Speech</button>
+                <button class="nav-tab" data-tab="clone">Voice Cloning</button>
+                <button class="nav-tab" data-tab="manage">Voice Manager</button>
+                <button class="nav-tab" data-tab="settings">Settings</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Generate Speech Tab -->
+        <div class="tab-content active" id="generate-tab">
+            <div class="generate-section">
+                <div class="text-input-section">
+                    <h2>Text to Speech Generation</h2>
+                    <div class="text-input-container">
+                        <textarea 
+                            id="text-input" 
+                            placeholder="Enter the text you want to convert to speech..."
+                            rows="6"
+                        ></textarea>
+                        <div class="text-controls">
+                            <button id="clear-text">Clear</button>
+                            <button id="paste-text">Paste</button>
+                            <span class="char-count">0 characters</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="voice-selection-section">
+                    <h3>Voice Selection</h3>
+                    <div class="voice-search-container">
+                        <input type="text" id="voice-search" placeholder="Search voices..." />
+                        <div class="voice-filter-tabs">
+                            <button class="filter-tab active" data-filter="all">All</button>
+                            <button class="filter-tab" data-filter="built-in">Built-in</button>
+                            <button class="filter-tab" data-filter="custom">Custom</button>
+                            <button class="filter-tab" data-filter="mixed">Voice Mix</button>
+                        </div>
+                    </div>
+                    
+                    <div class="selected-voices-container">
+                        <h4>Selected Voices</h4>
+                        <div id="selected-voices" class="selected-voices">
+                            <!-- Selected voices will appear here -->
+                        </div>
+                        <button id="create-voice-mix" class="secondary-btn">Create Voice Mix</button>
+                    </div>
+
+                    <div class="voice-grid" id="voice-grid">
+                        <!-- Voice cards will be populated here -->
+                    </div>
+                </div>
+
+                <div class="generation-controls">
+                    <div class="control-group">
+                        <label for="speed-control">Speed: <span id="speed-value">1.0</span>x</label>
+                        <input type="range" id="speed-control" min="0.1" max="4" step="0.1" value="1.0">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="volume-control">Volume: <span id="volume-value">100</span>%</label>
+                        <input type="range" id="volume-control" min="0" max="200" step="5" value="100">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="language-select">Language:</label>
+                        <select id="language-select">
+                            <option value="">Auto</option>
+                            <option value="a">English</option>
+                            <option value="e">Spanish</option>
+                            <option value="f">French</option>
+                            <option value="h">Hindi</option>
+                            <option value="i">Italian</option>
+                            <option value="p">Portuguese</option>
+                            <option value="j">Japanese</option>
+                            <option value="z">Chinese</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="format-select">Format:</label>
+                        <select id="format-select">
+                            <option value="mp3">MP3</option>
+                            <option value="wav">WAV</option>
+                            <option value="flac">FLAC</option>
+                            <option value="opus">OPUS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="generation-buttons">
+                    <button id="generate-btn" class="primary-btn">
+                        <span class="btn-text">Generate Speech</span>
+                        <div class="btn-loader"></div>
+                    </button>
+                    <button id="stop-generation" class="danger-btn" style="display: none;">Stop</button>
+                </div>
+
+                <div class="audio-player-section" id="audio-player-section" style="display: none;">
+                    <h3>Generated Audio</h3>
+                    <div class="audio-player">
+                        <audio id="audio-player" controls></audio>
+                        <div class="audio-controls">
+                            <button id="download-audio" class="secondary-btn">Download</button>
+                            <button id="save-as-voice" class="secondary-btn">Save as Voice Sample</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Cloning Tab -->
+        <div class="tab-content" id="clone-tab">
+            <div class="clone-section">
+                <h2>Voice Cloning</h2>
+                <p class="section-description">Upload audio samples to create custom voice models</p>
+                
+                <div class="upload-section">
+                    <div class="upload-area" id="voice-upload-area">
+                        <div class="upload-icon">📎</div>
+                        <p>Drop audio files here or click to browse</p>
+                        <input type="file" id="voice-file-input" multiple accept="audio/*" hidden>
+                        <div class="upload-info">
+                            <small>Supported formats: WAV, MP3, FLAC (Minimum 10 seconds, Maximum 5 minutes per file)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uploaded-files" id="uploaded-files" style="display: none;">
+                    <h3>Uploaded Audio Samples</h3>
+                    <div class="file-list" id="file-list">
+                        <!-- Uploaded files will appear here -->
+                    </div>
+                </div>
+
+                <div class="cloning-options">
+                    <div class="option-group">
+                        <label for="voice-name">Voice Name:</label>
+                        <input type="text" id="voice-name" placeholder="Enter a name for your custom voice">
+                    </div>
+                    
+                    <div class="option-group">
+                        <label for="voice-description">Description (optional):</label>
+                        <textarea id="voice-description" placeholder="Describe this voice..." rows="3"></textarea>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="training-quality">Training Quality:</label>
+                        <select id="training-quality">
+                            <option value="fast">Fast (Lower quality, faster processing)</option>
+                            <option value="balanced" selected>Balanced (Good quality, moderate time)</option>
+                            <option value="high">High (Best quality, longer processing)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="cloning-buttons">
+                    <button id="start-cloning" class="primary-btn" disabled>
+                        <span class="btn-text">Start Voice Cloning</span>
+                        <div class="btn-loader"></div>
+                    </button>
+                    <button id="cancel-cloning" class="danger-btn" style="display: none;">Cancel</button>
+                </div>
+
+                <div class="cloning-progress" id="cloning-progress" style="display: none;">
+                    <h3>Cloning Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Initializing...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Manager Tab -->
+        <div class="tab-content" id="manage-tab">
+            <div class="manager-section">
+                <h2>Voice Manager</h2>
+                <p class="section-description">Manage your custom voices and voice mixes</p>
+                
+                <div class="manager-filters">
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-type="all">All Voices</button>
+                        <button class="filter-btn" data-type="custom">Custom Voices</button>
+                        <button class="filter-btn" data-type="mixed">Voice Mixes</button>
+                    </div>
+                    <div class="search-group">
+                        <input type="text" id="manager-search" placeholder="Search voices...">
+                    </div>
+                </div>
+
+                <div class="voice-manager-grid" id="voice-manager-grid">
+                    <!-- Voice management cards will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings-tab">
+            <div class="settings-section">
+                <h2>Settings</h2>
+                
+                <div class="settings-group">
+                    <h3>Audio Settings</h3>
+                    <div class="setting-item">
+                        <label for="default-format">Default Audio Format:</label>
+                        <select id="default-format">
+                            <option value="mp3">MP3</option>
+                            <option value="wav">WAV</option>
+                            <option value="flac">FLAC</option>
+                            <option value="opus">OPUS</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="auto-download">Auto-download generated audio:</label>
+                        <input type="checkbox" id="auto-download">
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Voice Cloning Settings</h3>
+                    <div class="setting-item">
+                        <label for="max-upload-size">Max upload size per file (MB):</label>
+                        <input type="number" id="max-upload-size" value="50" min="1" max="500">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="auto-save-samples">Auto-save generated audio as voice samples:</label>
+                        <input type="checkbox" id="auto-save-samples">
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>System Information</h3>
+                    <div class="system-info" id="system-info">
+                        <!-- System info will be populated here -->
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button id="export-settings" class="secondary-btn">Export Settings</button>
+                    <button id="import-settings" class="secondary-btn">Import Settings</button>
+                    <button id="reset-settings" class="danger-btn">Reset to Defaults</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Status/Notification System -->
+    <div class="notification-container" id="notification-container">
+        <!-- Notifications will appear here -->
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Processing...</div>
+        </div>
+    </div>
+
+    <script type="module" src="src/enhanced-app.js"></script>
+</body>
+</html>

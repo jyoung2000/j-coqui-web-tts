@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  j-coqui-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: j-coqui-web-tts
+    ports:
+      - "2222:2222"
+    volumes:
+      # Persistent storage for custom voices (UnRaid compatible path)
+      - /mnt/user/appdata/j-coqui-web/voices:/app/voices/custom:rw
+      # Persistent storage for downloads (UnRaid compatible path)
+      - /mnt/user/appdata/j-coqui-web/downloads:/app/downloads:rw
+      # Optional: Model cache for faster startups
+      - /mnt/user/appdata/j-coqui-web/models:/app/api/src/models:rw
+      # UnRaid shares for input/output (optional)
+      - /mnt/user/Media/TTS-Output:/app/output:rw
+    environment:
+      - PYTHONPATH=/app:/app/api
+      - USE_GPU=true
+      - PYTHONUNBUFFERED=1
+      - PORT=2222
+      - CUSTOM_VOICES_DIR=/app/voices/custom
+      - DOWNLOADS_DIR=/app/downloads
+      - OUTPUT_DIR=/app/output
+      - ALLOW_VOICE_CLONING=true
+      - ALLOW_LOCAL_VOICE_SAVING=true
+      - DOWNLOAD_MODEL=false  # Set to true for first run, false after models are cached
+      # UnRaid optimization settings
+      - UV_CACHE_DIR=/tmp/uv-cache
+      - TMPDIR=/tmp
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+        limits:
+          # Prevent container from using all GPU memory
+          memory: 8G
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2222/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s  # Longer start period for model loading
+    # UnRaid networking
+    network_mode: bridge
+    labels:
+      # UnRaid template labels
+      - "net.unraid.docker.managed=dockerman"
+      - "net.unraid.docker.webui=http://[IP]:[PORT:2222]/"
+      - "net.unraid.docker.icon=https://raw.githubusercontent.com/jyoung2000/j-coqui-web-tts/main/assets/icon.png"
+
+# UnRaid-style volume definitions (external volumes managed by UnRaid)
+volumes:
+  voices:
+    external: true
+    name: j-coqui-voices
+  downloads:
+    external: true
+    name: j-coqui-downloads
+  models:
+    external: true
+    name: j-coqui-models
+
+networks:
+  default:
+    name: j-coqui-network
+    driver: bridge

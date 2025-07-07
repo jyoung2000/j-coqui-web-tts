@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+.tox/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Application data
+voices/
+downloads/
+models/
+output/
+temp/
+logs/
+
+# Model files (too large for git)
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Audio files
+*.wav
+*.mp3
+*.flac
+*.opus
+*.m4a
+
+# Node modules (if any)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Temporary files
+tmp/
+*.tmp
+*.temp
+
+# UV cache
+.uv/
+
+# System files
+*.log
